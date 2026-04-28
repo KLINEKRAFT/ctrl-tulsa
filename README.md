@@ -7,21 +7,24 @@ Personal dashboard for Tulsa OK. Single-page, real-time data, Nothing-inspired d
 ```
 ctrl-tulsa/
 ├── index.html       → the dashboard (HTML/CSS/JS, single file, no build step)
-├── vercel.json      → Vercel config (cache headers, region pinning)
+├── vercel.json      → Vercel config (cache headers)
 ├── package.json     → Node version pin for Vercel
 ├── README.md        → this file
 └── api/
-    ├── weather.js   → proxies Open-Meteo, 5min cache
-    ├── alerts.js    → proxies NWS alerts for Tulsa, 60s cache
-    ├── radar.js     → proxies RainViewer index, 5min cache
-    ├── aviation.js  → proxies OpenSky aircraft data, 30s cache
-    └── iss.js       → proxies wheretheiss.at, 4s cache
+    ├── weather.js   → Edge fn proxying Open-Meteo, 5min cache
+    ├── alerts.js    → Edge fn proxying NWS alerts, 60s cache
+    ├── radar.js     → Edge fn proxying RainViewer index, 5min cache
+    ├── aviation.js  → Edge fn proxying OpenSky aircraft, 30s cache
+    └── iss.js       → Edge fn proxying wheretheiss.at, 4s cache
 ```
 
-## Why API functions instead of direct browser calls?
+## Why Edge Functions?
 
-Each `api/*.js` is a Vercel serverless function. The browser hits `/api/weather`
-instead of `api.open-meteo.com` directly. Three benefits:
+Each `api/*.js` runs as a Vercel **Edge function** — code runs at the closest
+of Vercel's 200+ edge locations to whoever's loading the page, instead of in
+a single region. ~10ms cold starts vs. 200ms regional. Same JavaScript code.
+
+Three benefits over direct browser calls:
 
 1. **Caching** — Vercel's edge cache means 1000 visitors = 1 upstream call
 2. **Reliability** — server-to-server calls don't have browser CORS issues
@@ -29,6 +32,25 @@ instead of `api.open-meteo.com` directly. Three benefits:
 
 OpenSky (aviation) is the function that benefits the most. NWS officially asks
 for a User-Agent identifying the application; we send that server-side.
+
+## Features
+
+- **Massive Doto pixel clock** — dominates the top
+- **Away-mode message** — type any message, scrolls Pokémon-banner style across
+  the screen and as a strip ABOVE the clock on the dashboard. Persists.
+- **Severe weather ticker** — slim red strip, only when NWS has active alerts
+- **Hourly forecast** — next 12 hours, temp + precip bars
+- **Live radar** — click to expand fullscreen. Inside the expanded view:
+  - Zoom levels (30km / 60km / 125km / 250km / 500km)
+  - Play/pause
+  - Drag scrubber for past 2 hours + forecast
+  - Animation speed (slow / med / fast)
+  - Color schemes (classic / rainbow / red / black)
+  - ESC or close button to collapse
+- **Aviation** — live aircraft within 80km of Tulsa, callsigns and altitude
+- **Holiday calendar** — countdown to next US holiday + upcoming list
+- **ISS tracker** — live position with crosshair on world grid
+- **Light/dark slider** — instant theme toggle, persists
 
 ## Deploy via GitHub + Vercel (web only, no terminal needed)
 
@@ -89,15 +111,16 @@ the live URL.
 - **Change location**: edit `TULSA_LAT` / `TULSA_LON` in each `api/*.js`
   AND the `TULSA` constant at the top of the script in `index.html`
 - **Adjust cache**: change `s-maxage=N` in each function's `Cache-Control` header
-- **Add a panel**: append a new section in `index.html`'s `.content` grid,
-  add CSS for the new `.panel` class
+- **Change default radar zoom**: edit `radarState.zoom` in `index.html` (5-9)
+- **Change default radar color**: edit `radarState.color` (RainViewer palettes)
 
 ## Tech notes
 
 - No build step, no bundler, no framework
+- All API endpoints run as Edge functions on Vercel
 - All fonts from Google Fonts CDN (Doto, Space Grotesk, Space Mono)
-- Theme persisted in localStorage
-- Away-mode messages persisted in localStorage
+- Theme + away message persisted in localStorage
+- Radar settings reset to defaults on each page load (by design)
 - Radar tile imagery loads directly from `tilecache.rainviewer.com` (CORS-friendly)
 - CartoDB basemap loads directly from their CDN
 

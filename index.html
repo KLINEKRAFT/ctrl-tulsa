@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTRL // TULSA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Doto:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root, .theme-dark {
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --line: #1f1f1f;
+    --line-bright: #2a2a2a;
+    --ink: #f5f5f5;
+    --ink-dim: #6e6e6e;
+    --ink-faint: #3a3a3a;
+    --accent: #ff3b30;
+    --accent-dim: rgba(255, 59, 48, 0.55);
+    --grid-bg: rgba(255,255,255,0.012);
+    --halo: rgba(255,255,255,0.025);
+  }
+  .theme-light {
+    --bg: #ededed;
+    --surface: #f5f5f5;
+    --line: #d4d4d4;
+    --line-bright: #c0c0c0;
+    --ink: #0a0a0a;
+    --ink-dim: #6e6e6e;
+    --ink-faint: #b0b0b0;
+    --accent: #d92d22;
+    --accent-dim: rgba(217, 45, 34, 0.55);
+    --grid-bg: rgba(0,0,0,0.02);
+    --halo: rgba(0,0,0,0.025);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  body {
+    background-image:
+      radial-gradient(ellipse at 50% 0%, var(--halo) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent 0px, transparent 3px, var(--grid-bg) 3px, var(--grid-bg) 4px);
+  }
+
+  .app {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    height: 100vh;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6px;
+  }
+  .brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .brand .sep { color: var(--ink-faint); margin: 0 8px; font-weight: 400; }
+  .brand .dim { color: var(--ink-dim); font-weight: 400; }
+
+  .top-actions { display: flex; align-items: center; gap: 14px; }
+  .live {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    border: 1px solid var(--ink-faint);
+    padding: 4px 8px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-dim); }
+    50%      { opacity: 0.45; box-shadow: 0 0 0 5px transparent; }
+  }
+
+  /* ALERT TICKER */
+  .alert-ticker {
+    height: 24px;
+    background: var(--accent);
+    color: #fff;
+    overflow: hidden;
+    display: none;
+    align-items: center;
+    flex-shrink: 0;
+    animation: alert-glow 2.4s ease-in-out infinite;
+  }
+  .alert-ticker.active { display: flex; }
+  @keyframes alert-glow {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent-dim); }
+    50%      { box-shadow: 0 0 0 6px transparent; }
+  }
+  .alert-prefix {
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.28);
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    gap: 8px;
+  }
+  .alert-prefix .alert-icon {
+    width: 11px; height: 11px;
+    border: 1.5px solid #fff;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .alert-prefix .alert-icon::after {
+    content: "!";
+    position: absolute; inset: 0;
+    text-align: center; line-height: 8px;
+    font-weight: 900; font-size: 8px;
+  }
+  .alert-scroll {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+  }
+  .alert-scroll-inner {
+    position: absolute;
+    top: 50%; left: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    will-change: transform;
+  }
+  .alert-scroll-inner span { padding-right: 80px; }
+
+  /* MESSAGE STRIP */
+  .msg-strip {
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    position: relative;
+    display: none;
+  }
+  .msg-strip.active { display: block; }
+  .msg-strip-inner {
+    position: absolute;
+    top: 50%; left: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .msg-strip-inner span { padding-right: 80px; }
+
+  /* CONTENT GRID — three rows */
+  .content {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: minmax(260px, 0.45fr) minmax(180px, 0.25fr) minmax(220px, 0.30fr);
+    gap: 12px;
+    min-height: 0;
+  }
+
+  /* row 1 */
+  .hero    { grid-column: 1 / 13; grid-row: 1; }
+  /* row 2 — weather + hourly forecast */
+  .weather  { grid-column: 1 / 5;  grid-row: 2; }
+  .forecast { grid-column: 5 / 13; grid-row: 2; }
+  /* row 3 — radar + aviation + calendar + iss */
+  .radar    { grid-column: 1 / 5;   grid-row: 3; }
+  .aviation { grid-column: 5 / 8;   grid-row: 3; }
+  .calendar { grid-column: 8 / 10;  grid-row: 3; }
+  .iss      { grid-column: 10 / 13; grid-row: 3; }
+
+  /* PANEL */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    position: relative;
+    transition: background 0.4s ease, border-color 0.4s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel::before, .panel::after, .panel .ctr, .panel .cbl {
+    content: "";
+    position: absolute;
+    width: 8px; height: 8px;
+    border: 1px solid var(--ink);
+    pointer-events: none;
+    transition: border-color 0.4s ease;
+    z-index: 2;
+  }
+  .panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .panel::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .panel .ctr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .panel .cbl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .label {
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+  }
+  .label.strong { color: var(--ink); }
+  .label .num { color: var(--ink-faint); }
+
+  /* HERO */
+  .hero { display: grid; grid-template-rows: auto auto 1fr auto; }
+  .hero-clock-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 32px;
+  }
+  .clock {
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: clamp(120px, 18vw, 280px);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .clock .secs {
+    font-size: clamp(36px, 5vw, 80px);
+    color: var(--ink-dim);
+    margin-left: 16px;
+    font-weight: 700;
+  }
+  .hero-foot {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .hero-foot .cell { background: var(--surface); padding: 12px 18px; }
+  .hero-foot .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .hero-foot .v {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* WEATHER */
+  .weather-body { display: grid; grid-template-rows: 1fr auto; flex: 1; min-height: 0; }
+  .weather-main {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: center;
+  }
+  .temp {
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: clamp(56px, 5.5vw, 88px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .temp .deg { font-size: 0.35em; color: var(--ink-dim); margin-left: 4px; }
+  .cond-block { text-align: right; }
+  .cond {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  .feels {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .weather-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .weather-grid .cell { background: var(--surface); padding: 10px 8px; text-align: center; }
+  .weather-grid .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .weather-grid .v {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* HOURLY FORECAST */
+  .forecast-body {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .forecast-cols {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .forecast-col {
+    background: var(--surface);
+    padding: 8px 4px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100px;
+    gap: 4px;
+  }
+  .fc-hour {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .fc-temp {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .fc-bar-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+    padding: 4px 0;
+  }
+  .fc-bar {
+    width: 100%;
+    background: var(--ink-faint);
+    min-height: 2px;
+    transition: height 0.4s ease;
+  }
+  .fc-bar.warm { background: var(--ink); }
+  .fc-bar.hot  { background: var(--accent); }
+  .fc-rain {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+  }
+  .fc-rain.wet { color: var(--accent); font-weight: 700; }
+
+  /* RADAR */
+  .radar-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .radar-tiles {
+    position: absolute;
+    inset: 0;
+    background-color: var(--bg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transition: opacity 0.3s ease;
+    image-rendering: auto;
+  }
+  .radar-tiles.basemap { opacity: 0.55; filter: grayscale(1) contrast(1.4) brightness(0.55); }
+  .radar-tiles.precip  { opacity: 0; mix-blend-mode: screen; }
+  .radar-tiles.precip.show { opacity: 0.95; }
+  .radar-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(0deg, transparent 49%, var(--ink-faint) 49%, var(--ink-faint) 51%, transparent 51%),
+      linear-gradient(90deg, transparent 49%, var(--ink-faint) 49%, var(--ink-faint) 51%, transparent 51%);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .radar-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 14px; height: 14px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .radar-center::before, .radar-center::after {
+    content: "";
+    position: absolute;
+    background: var(--accent);
+  }
+  .radar-center::before { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+  .radar-center::after  { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+  .radar-center .center-dot {
+    position: absolute;
+    inset: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .radar-foot {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 6px 10px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.7), transparent);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #fff;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .theme-light .radar-foot { background: linear-gradient(0deg, rgba(255,255,255,0.7), transparent); color: var(--ink); }
+
+  /* RADAR — clickable + expanded state */
+  .panel.radar { cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .panel.radar:hover { border-color: var(--ink-bright, var(--ink)); }
+  .panel.radar:hover .radar-foot::after {
+    content: "CLICK TO EXPAND ↗";
+    position: absolute;
+    top: 8px; right: 10px;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 3px 7px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid var(--ink);
+    z-index: 4;
+  }
+
+  .panel.radar.expanded {
+    position: fixed;
+    inset: 16px;
+    z-index: 90;
+    grid-column: unset !important;
+    grid-row: unset !important;
+    cursor: default;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,0.85);
+  }
+  .theme-light .panel.radar.expanded { box-shadow: 0 0 0 100vmax rgba(0,0,0,0.5); }
+  /* Note: controls are absolutely positioned, so no padding needed on body */
+
+  /* RADAR CONTROLS (only shown when expanded) */
+  .radar-controls {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 14px 16px 12px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.95) 30%, transparent);
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 5;
+  }
+  .theme-light .radar-controls { background: linear-gradient(0deg, rgba(255,255,255,0.95) 30%, transparent); }
+  .panel.radar.expanded .radar-controls { display: flex; }
+
+  .radar-control-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .radar-ctrl-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    min-width: 60px;
+  }
+  .radar-ctrl-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-transform: uppercase;
+    text-align: right;
+    min-width: 60px;
+  }
+
+  .radar-btn-group {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+  }
+  .radar-btn {
+    background: var(--bg);
+    border: 1px solid var(--line-bright);
+    color: var(--ink-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    padding: 7px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .radar-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .radar-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* PLAY/PAUSE button */
+  .radar-play {
+    width: 36px;
+    height: 36px;
+    background: var(--bg);
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .radar-play:hover { background: var(--ink); color: var(--bg); }
+  .radar-play .icon { font-size: 14px; line-height: 1; font-family: 'Space Mono', monospace; }
+
+  /* SCRUBBER */
+  .radar-scrub {
+    flex: 1;
+    height: 30px;
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--line-bright);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .radar-scrub-track {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    right: 8px;
+    height: 1px;
+    background: var(--ink-faint);
+    transform: translateY(-50%);
+  }
+  .radar-scrub-fill {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    height: 1px;
+    background: var(--ink);
+    transform: translateY(-50%);
+    transition: width 0.15s;
+  }
+  .radar-scrub-knob {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 18px;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+    transition: left 0.2s ease-out;
+    pointer-events: none;
+  }
+  .radar-scrub-ticks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .radar-scrub-tick {
+    position: absolute;
+    top: 50%;
+    width: 1px;
+    height: 6px;
+    background: var(--ink-faint);
+    transform: translate(-50%, -50%);
+  }
+  .radar-scrub-tick.forecast { background: var(--accent); opacity: 0.6; height: 8px; }
+
+  /* CLOSE BUTTON (inside panel head when expanded) */
+  .radar-close {
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    color: var(--ink-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    padding: 4px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: none;
+    transition: all 0.15s;
+  }
+  .radar-close:hover { color: var(--ink); border-color: var(--ink); }
+  .panel.radar.expanded .radar-close { display: inline-block; }
+  .panel.radar.expanded .radar-foot { display: none; }
+  .panel.radar.expanded .panel-head .label:not(:first-child) { display: none; }
+  .panel.radar.expanded .radar-foot::after { display: none !important; content: none !important; }
+
+  /* AVIATION */
+  .aviation-body {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .aviation-count {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .aviation-count .big {
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: 56px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .aviation-count .label-block {
+    text-align: right;
+  }
+  .aviation-count .label-block .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .aviation-list {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .av-row {
+    background: var(--surface);
+    padding: 6px 10px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .av-row .call {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.1em;
+  }
+  .av-row .alt {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    text-align: right;
+    text-transform: uppercase;
+  }
+  .av-row .arrow {
+    color: var(--accent);
+    font-size: 10px;
+    line-height: 1;
+    transform-origin: center;
+    width: 12px;
+    text-align: center;
+  }
+  .av-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* CALENDAR */
+  .cal-body {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .cal-event-main {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cal-event-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  .cal-event-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .cal-countdown {
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: 36px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .cal-countdown .unit {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-left: 6px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+  }
+  .cal-list {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+    margin: 4px -16px -14px;
+  }
+  .cal-row {
+    background: var(--surface);
+    padding: 6px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .cal-row .name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cal-row .when {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  /* ISS */
+  .iss-body {
+    padding: 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .iss-globe {
+    flex: 1;
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    min-height: 70px;
+  }
+  .grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(0deg, transparent 49%, var(--ink-faint) 49%, var(--ink-faint) 51%, transparent 51%),
+      linear-gradient(90deg, transparent 49%, var(--ink-faint) 49%, var(--ink-faint) 51%, transparent 51%),
+      repeating-linear-gradient(0deg, transparent 0, transparent 11px, rgba(125,125,125,0.08) 11px, rgba(125,125,125,0.08) 12px),
+      repeating-linear-gradient(90deg, transparent 0, transparent 11px, rgba(125,125,125,0.08) 11px, rgba(125,125,125,0.08) 12px);
+    opacity: 0.6;
+  }
+  .iss-marker { position: absolute; width: 12px; height: 12px; transform: translate(-50%, -50%); transition: left 0.6s ease, top 0.6s ease; }
+  .iss-marker::before, .iss-marker::after { content: ""; position: absolute; background: var(--accent); }
+  .iss-marker::before { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+  .iss-marker::after  { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+  .iss-marker .iss-dot { position: absolute; inset: 4px; background: var(--accent); border-radius: 50%; animation: pulse 1.6s ease-in-out infinite; }
+  .tulsa-marker { position: absolute; width: 6px; height: 6px; border: 1px solid var(--ink); transform: translate(-50%, -50%); }
+  .iss-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .iss-stats .cell { background: var(--surface); padding: 6px 4px; text-align: center; }
+  .iss-stats .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .iss-stats .v {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* FOOTER */
+  .footer {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 0 6px;
+  }
+  .footer-left, .footer-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .footer-right { text-align: right; }
+  .theme-slider { display: flex; align-items: center; gap: 12px; }
+  .theme-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    user-select: none;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .theme-label.active { color: var(--ink); }
+  .slider-track {
+    position: relative;
+    width: 70px;
+    height: 24px;
+    background: var(--bg);
+    border: 1px solid var(--line-bright);
+    cursor: pointer;
+    touch-action: none;
+  }
+  .slider-knob {
+    position: absolute;
+    top: 1px; left: 1px;
+    width: calc(50% - 1px);
+    height: calc(100% - 2px);
+    background: var(--ink);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-light .slider-knob { left: calc(50%); }
+  .slider-knob::before { content: ""; width: 4px; height: 4px; background: var(--bg); border-radius: 50%; }
+
+  .away-btn {
+    background: var(--surface);
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    padding: 7px 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .away-btn:hover { background: var(--ink); color: var(--bg); }
+
+  /* AWAY MODE */
+  .away-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .away-overlay.active { display: block; }
+  .away-overlay::before, .away-overlay::after, .away-overlay .ctr, .away-overlay .cbl {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1px solid var(--ink);
+    pointer-events: none;
+    z-index: 6;
+  }
+  .away-overlay::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+  .away-overlay::after  { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+  .away-overlay .ctr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+  .away-overlay .cbl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+  .away-clock {
+    position: absolute;
+    top: 28px; left: 28px;
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--ink);
+    z-index: 5;
+    letter-spacing: -0.02em;
+  }
+  .away-meta {
+    position: absolute;
+    top: 32px; right: 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    text-align: right;
+    z-index: 5;
+  }
+  .away-meta .strong { color: var(--ink); display: block; margin-top: 4px; }
+  .away-input-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 0 60px;
+    z-index: 4;
+  }
+  .away-input-wrap.hidden { display: none; }
+  .away-input-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .away-input {
+    width: 100%;
+    max-width: 1200px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: clamp(72px, 11vw, 180px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    padding: 0 0 16px 0;
+    caret-color: var(--accent);
+  }
+  .away-input::placeholder { color: var(--ink-faint); text-transform: uppercase; }
+  .away-input:focus { border-bottom-color: var(--ink); }
+  .away-input-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .away-input-hint .key {
+    color: var(--ink-dim);
+    border: 1px solid var(--ink-faint);
+    padding: 2px 6px;
+    margin: 0 4px;
+  }
+  .away-ticker-wrap {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    transform: translateY(-50%);
+    height: 35vh;
+    min-height: 220px;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 10px, rgba(125,125,125,0.04) 10px, rgba(125,125,125,0.04) 11px);
+    display: none;
+  }
+  .away-ticker-wrap.active { display: block; }
+  .away-ticker {
+    position: absolute;
+    top: 50%; left: 0;
+    transform: translateY(-50%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    font-family: 'Doto', monospace;
+    font-weight: 900;
+    font-size: clamp(120px, 22vh, 240px);
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .away-ticker span { padding-right: 200px; }
+  .away-edit-btn {
+    position: absolute;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 5;
+    display: none;
+    transition: all 0.2s;
+  }
+  .away-edit-btn.active { display: block; }
+  .away-edit-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .away-hint {
+    position: absolute;
+    bottom: 28px; right: 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    z-index: 5;
+  }
+
+  @media (max-width: 1280px) {
+    .weather  { grid-column: 1 / 6; }
+    .forecast { grid-column: 6 / 13; }
+    .radar    { grid-column: 1 / 7; }
+    .aviation { grid-column: 7 / 10; }
+    .calendar { grid-column: 10 / 13; }
+    .iss      { grid-column: 1 / 13; grid-row: 4; }
+    .content { grid-template-rows: minmax(240px, 0.40fr) minmax(160px, 0.20fr) minmax(200px, 0.22fr) minmax(140px, 0.18fr); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">CTRL <span class="sep">//</span> <span class="dim">TULSA OK</span></div>
+    <div class="top-actions">
+      <span class="live"><span class="pulse"></span><span>LIVE</span></span>
+    </div>
+  </div>
+
+  <!-- ALERT TICKER -->
+  <div id="alertBanner" class="alert-ticker">
+    <div class="alert-prefix">
+      <div class="alert-icon"></div>
+      <span>NWS ALERT</span>
+    </div>
+    <div class="alert-scroll">
+      <div class="alert-scroll-inner" id="alertInner">
+        <span id="alertText">SEVERE WEATHER ALERT</span>
+        <span id="alertText2">SEVERE WEATHER ALERT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT GRID -->
+  <div class="content">
+
+    <!-- HERO -->
+    <div class="panel hero">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[01]</span> &nbsp; LOCAL TIME</span>
+        <span class="label">N 36.15° / W 95.99°</span>
+      </div>
+      <div class="msg-strip" id="msgStrip">
+        <div class="msg-strip-inner" id="msgStripInner"><span></span><span></span></div>
+      </div>
+      <div class="hero-clock-wrap">
+        <div class="clock" id="clock">00:00<span class="secs" id="secs">:00</span></div>
+      </div>
+      <div class="hero-foot">
+        <div class="cell"><div class="k">DATE</div><div class="v" id="dateStr">— — —</div></div>
+        <div class="cell"><div class="k">TIMEZONE</div><div class="v" id="tzStr">CDT</div></div>
+        <div class="cell"><div class="k">DAY OF YEAR</div><div class="v" id="doyStr">—</div></div>
+      </div>
+    </div>
+
+    <!-- WEATHER -->
+    <div class="panel weather">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[02]</span> &nbsp; WEATHER // TULSA</span>
+        <span class="label" id="wxUpdated">— —</span>
+      </div>
+      <div class="weather-body">
+        <div class="weather-main">
+          <div class="temp" id="temp">--<span class="deg">°F</span></div>
+          <div class="cond-block">
+            <div class="cond" id="cond">LOADING</div>
+            <div class="feels" id="feels">FEELS — °F</div>
+          </div>
+        </div>
+        <div class="weather-grid">
+          <div class="cell"><div class="k">WIND</div><div class="v" id="wxWind">—</div></div>
+          <div class="cell"><div class="k">HUMID</div><div class="v" id="wxHum">—</div></div>
+          <div class="cell"><div class="k">UV IDX</div><div class="v" id="wxUv">—</div></div>
+          <div class="cell"><div class="k">PRESS</div><div class="v" id="wxPress">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOURLY FORECAST -->
+    <div class="panel forecast">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[03]</span> &nbsp; HOURLY // 12 H</span>
+        <span class="label" id="fcUpdated">— —</span>
+      </div>
+      <div class="forecast-body">
+        <div class="forecast-cols" id="fcCols">
+          <!-- 12 columns generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RADAR -->
+    <div class="panel radar" id="radarPanel">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[04]</span> &nbsp; RADAR // PRECIP</span>
+        <span class="label" id="radarUpdated">— —</span>
+        <button class="radar-close" id="radarClose">CLOSE ✕</button>
+      </div>
+      <div class="radar-body">
+        <div class="radar-tiles basemap" id="radarBase"></div>
+        <div class="radar-tiles precip"  id="radarPrecip"></div>
+        <div class="radar-overlay"></div>
+        <div class="radar-center"><span class="center-dot"></span></div>
+        <div class="radar-foot">
+          <span id="radarLabel">TULSA · 50KM</span>
+          <span id="radarFrame">—</span>
+        </div>
+
+        <!-- CONTROLS — only visible when expanded -->
+        <div class="radar-controls" id="radarControls">
+          <div class="radar-control-row">
+            <span class="radar-ctrl-label">ZOOM</span>
+            <div class="radar-btn-group">
+              <button class="radar-btn"        data-zoom="9">30KM</button>
+              <button class="radar-btn"        data-zoom="8">60KM</button>
+              <button class="radar-btn active" data-zoom="7">125KM</button>
+              <button class="radar-btn"        data-zoom="6">250KM</button>
+              <button class="radar-btn"        data-zoom="5">500KM</button>
+            </div>
+            <span class="radar-ctrl-value" id="radarZoomLabel">125KM</span>
+          </div>
+
+          <div class="radar-control-row">
+            <button class="radar-play" id="radarPlay" title="Play/Pause">
+              <span class="icon" id="radarPlayIcon">▌▌</span>
+            </button>
+            <div class="radar-scrub" id="radarScrub">
+              <div class="radar-scrub-track"></div>
+              <div class="radar-scrub-fill" id="radarScrubFill"></div>
+              <div class="radar-scrub-ticks" id="radarScrubTicks"></div>
+              <div class="radar-scrub-knob" id="radarScrubKnob" style="left: 0%;"></div>
+            </div>
+            <span class="radar-ctrl-value" id="radarTimeLabel">— —</span>
+          </div>
+
+          <div class="radar-control-row">
+            <span class="radar-ctrl-label">SPEED</span>
+            <div class="radar-btn-group">
+              <button class="radar-btn"        data-speed="1200">SLOW</button>
+              <button class="radar-btn active" data-speed="600">MED</button>
+              <button class="radar-btn"        data-speed="300">FAST</button>
+            </div>
+            <span class="radar-ctrl-label">COLOR</span>
+          </div>
+
+          <div class="radar-control-row">
+            <span class="radar-ctrl-label">SCHEME</span>
+            <div class="radar-btn-group">
+              <button class="radar-btn active" data-color="4">CLASSIC</button>
+              <button class="radar-btn"        data-color="2">RAINBOW</button>
+              <button class="radar-btn"        data-color="6">RED</button>
+              <button class="radar-btn"        data-color="7">BLACK</button>
+            </div>
+            <span class="radar-ctrl-value" id="radarFrameCount">— FRAMES</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVIATION -->
+    <div class="panel aviation">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[05]</span> &nbsp; AIR // OVERHEAD</span>
+        <span class="label" id="avUpdated">— —</span>
+      </div>
+      <div class="aviation-body">
+        <div class="aviation-count">
+          <div class="big" id="avCount">0</div>
+          <div class="label-block">
+            <div class="k">AIRCRAFT</div>
+            <div class="k" style="margin-top:4px;">WITHIN 80KM</div>
+          </div>
+        </div>
+        <div class="aviation-list" id="avList">
+          <div class="av-empty">SCANNING SKY</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="panel calendar">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[06]</span> &nbsp; UPCOMING</span>
+      </div>
+      <div class="cal-body">
+        <div class="cal-event-main">
+          <div class="cal-event-name" id="calMainName">—</div>
+          <div class="cal-event-date" id="calMainDate">—</div>
+          <div class="cal-countdown" id="calMainCount">— <span class="unit">D</span></div>
+        </div>
+        <div class="cal-list" id="calList"></div>
+      </div>
+    </div>
+
+    <!-- ISS -->
+    <div class="panel iss">
+      <span class="ctr"></span><span class="cbl"></span>
+      <div class="panel-head">
+        <span class="label"><span class="num">[07]</span> &nbsp; ISS</span>
+        <span class="label" id="issStatus">TRACKING</span>
+      </div>
+      <div class="iss-body">
+        <div class="iss-globe">
+          <div class="grid-overlay"></div>
+          <div class="tulsa-marker" id="tulsaMark" style="left:50%; top:50%;"></div>
+          <div class="iss-marker" id="issMark" style="left:50%; top:30%;"><span class="iss-dot"></span></div>
+        </div>
+        <div class="iss-stats">
+          <div class="cell"><div class="k">LAT</div><div class="v" id="issLat">—</div></div>
+          <div class="cell"><div class="k">LON</div><div class="v" id="issLon">—</div></div>
+          <div class="cell"><div class="k">ALT KM</div><div class="v" id="issAlt">—</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-left" id="footStatus">SYS / OK</div>
+    <div class="theme-slider">
+      <span class="theme-label active" id="darkLabel">DARK</span>
+      <div class="slider-track" id="sliderTrack"><div class="slider-knob" id="sliderKnob"></div></div>
+      <span class="theme-label" id="lightLabel">LIGHT</span>
+      <button class="away-btn" id="awayBtn" style="margin-left: 14px;">AWAY MODE →</button>
+    </div>
+    <div class="footer-right">CTRL 3.2</div>
+  </div>
+
+</div>
+
+<!-- AWAY OVERLAY -->
+<div class="away-overlay" id="awayOverlay">
+  <span class="ctr"></span><span class="cbl"></span>
+  <div class="away-clock" id="awayClock">00:00</div>
+  <div class="away-meta">
+    <span>// AWAY MODE</span>
+    <span class="strong" id="awayDate">— — —</span>
+  </div>
+  <div class="away-input-wrap" id="awayInputWrap">
+    <div class="away-input-label">// MESSAGE</div>
+    <input class="away-input" id="awayInput" type="text" placeholder="TYPE A MESSAGE"
+           autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="120" />
+    <div class="away-input-hint">
+      PRESS <span class="key">RETURN</span> TO SCROLL &nbsp; • &nbsp; <span class="key">ESC</span> TO EXIT
+    </div>
+  </div>
+  <div class="away-ticker-wrap" id="awayTickerWrap">
+    <div class="away-ticker" id="awayTicker"><span></span><span></span></div>
+  </div>
+  <button class="away-edit-btn" id="awayEditBtn">EDIT MESSAGE</button>
+  <div class="away-hint">CLICK OUTSIDE TICKER OR PRESS ESC</div>
+</div>
+
+<script>
+const TULSA = { lat: 36.1540, lon: -95.9928 };
+const SP = 'nthg-ctrl-';
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ============ CLOCK ============
+function tickClock() {
+  const now = new Date();
+  const hh = pad(now.getHours()), mm = pad(now.getMinutes()), ss = pad(now.getSeconds());
+  document.getElementById('clock').firstChild.nodeValue = `${hh}:${mm}`;
+  document.getElementById('secs').textContent = `:${ss}`;
+  document.getElementById('awayClock').textContent = `${hh}:${mm}`;
+
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const dateStr = `${days[now.getDay()]} / ${pad(now.getDate())} ${months[now.getMonth()]} / ${now.getFullYear()}`;
+  document.getElementById('dateStr').textContent = dateStr;
+  document.getElementById('awayDate').textContent = dateStr;
+
+  const offMin = -now.getTimezoneOffset();
+  const sign = offMin >= 0 ? '+' : '−';
+  document.getElementById('tzStr').textContent = `UTC ${sign}${pad(Math.floor(Math.abs(offMin)/60))}:${pad(Math.abs(offMin)%60)}`;
+
+  const start = new Date(now.getFullYear(), 0, 0);
+  const doy = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  document.getElementById('doyStr').textContent = `${doy} / 365`;
+}
+
+// ============ WEATHER + HOURLY ============
+async function fetchWeather() {
+  try {
+    const r = await fetch('/api/weather');
+    if (!r.ok) throw new Error('weather http ' + r.status);
+    const d = await r.json();
+    const c = d.current;
+
+    document.getElementById('temp').innerHTML = `${Math.round(c.temperature_2m)}<span class="deg">°F</span>`;
+    document.getElementById('cond').textContent = wxText(c.weather_code);
+    document.getElementById('feels').textContent = `FEELS ${Math.round(c.apparent_temperature)}°F`;
+    document.getElementById('wxWind').textContent = `${Math.round(c.wind_speed_10m)} ${windDir(c.wind_direction_10m)}`;
+    document.getElementById('wxHum').textContent = `${Math.round(c.relative_humidity_2m)}%`;
+    document.getElementById('wxUv').textContent = d.daily.uv_index_max[0] != null ? d.daily.uv_index_max[0].toFixed(1) : '—';
+    document.getElementById('wxPress').textContent = Math.round(c.pressure_msl);
+    document.getElementById('wxUpdated').textContent = `UPD ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+
+    // hourly: starting from current hour, next 12
+    renderForecast(d.hourly, c.temperature_2m);
+  } catch (e) {
+    console.error('weather err', e);
+    document.getElementById('cond').textContent = 'OFFLINE';
+  }
+}
+function wxText(code) {
+  if (code === 0) return 'CLEAR';
+  if ([1,2].includes(code)) return 'PARTLY CLOUDY';
+  if (code === 3) return 'OVERCAST';
+  if ([45,48].includes(code)) return 'FOG';
+  if ([51,53,55,56,57].includes(code)) return 'DRIZZLE';
+  if ([61,63,65,66,67,80,81,82].includes(code)) return 'RAIN';
+  if ([71,73,75,77,85,86].includes(code)) return 'SNOW';
+  if ([95,96,99].includes(code)) return 'THUNDERSTORM';
+  return 'UNKNOWN';
+}
+function windDir(deg) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8]; }
+
+function renderForecast(hourly, currentTemp) {
+  const cols = document.getElementById('fcCols');
+  cols.innerHTML = '';
+  const now = new Date();
+  // find index of "now" in hourly.time array
+  const nowHourISO = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:00`;
+  let startIdx = hourly.time.findIndex(t => t.startsWith(nowHourISO));
+  if (startIdx < 0) startIdx = 0;
+  const slice = {
+    time: hourly.time.slice(startIdx, startIdx + 12),
+    temp: hourly.temperature_2m.slice(startIdx, startIdx + 12),
+    pop:  hourly.precipitation_probability.slice(startIdx, startIdx + 12)
+  };
+  // determine min/max temp for bar scaling
+  const minT = Math.min(...slice.temp);
+  const maxT = Math.max(...slice.temp);
+  const range = Math.max(1, maxT - minT);
+
+  slice.time.forEach((t, i) => {
+    const hour = parseInt(t.slice(11, 13), 10);
+    const temp = Math.round(slice.temp[i]);
+    const pop  = slice.pop[i] != null ? slice.pop[i] : 0;
+
+    // bar height as % of column (40-95%)
+    const norm = (slice.temp[i] - minT) / range;
+    const heightPct = 30 + norm * 60;
+
+    const tempClass = temp >= 85 ? 'hot' : (temp >= 65 ? 'warm' : '');
+    const rainClass = pop >= 40 ? 'wet' : '';
+
+    const col = document.createElement('div');
+    col.className = 'forecast-col';
+    col.innerHTML = `
+      <div class="fc-hour">${pad(hour)}h</div>
+      <div class="fc-bar-wrap">
+        <div class="fc-bar ${tempClass}" style="height:${heightPct}%"></div>
+      </div>
+      <div class="fc-temp">${temp}°</div>
+      <div class="fc-rain ${rainClass}">${pop}%</div>
+    `;
+    cols.appendChild(col);
+  });
+
+  document.getElementById('fcUpdated').textContent = `UPD ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+// ============ ISS — robust ============
+let issErrors = 0;
+async function fetchISS() {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch('/api/iss', { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error('iss http ' + r.status);
+    const d = await r.json();
+    if (typeof d.latitude !== 'number' || typeof d.longitude !== 'number') throw new Error('bad iss data');
+
+    issErrors = 0;
+    document.getElementById('issLat').textContent = `${d.latitude >= 0 ? 'N' : 'S'}${Math.abs(d.latitude).toFixed(1)}°`;
+    document.getElementById('issLon').textContent = `${d.longitude >= 0 ? 'E' : 'W'}${Math.abs(d.longitude).toFixed(1)}°`;
+    document.getElementById('issAlt').textContent = Math.round(d.altitude);
+    document.getElementById('issMark').style.left = `${((d.longitude + 180) / 360) * 100}%`;
+    document.getElementById('issMark').style.top  = `${((90 - d.latitude) / 180) * 100}%`;
+    document.getElementById('tulsaMark').style.left = `${((TULSA.lon + 180) / 360) * 100}%`;
+    document.getElementById('tulsaMark').style.top  = `${((90 - TULSA.lat) / 180) * 100}%`;
+    const close = Math.abs(d.latitude - TULSA.lat) < 8 && Math.abs(d.longitude - TULSA.lon) < 12;
+    document.getElementById('issStatus').textContent = close ? '⌖ NEAR TULSA' : 'TRACKING';
+  } catch (e) {
+    issErrors++;
+    if (issErrors >= 2) document.getElementById('issStatus').textContent = 'OFFLINE';
+    console.error('iss err', e);
+  }
+}
+
+// ============ ALERTS ============
+let alertAnim = null;
+function startAlertScroll() {
+  cancelAnimationFrame(alertAnim);
+  const inner = document.getElementById('alertInner');
+  const s1 = document.getElementById('alertText');
+  let x = 0, halfW = 0;
+  const speed = 0.8;
+  function measure() {
+    halfW = s1.offsetWidth + parseInt(getComputedStyle(s1).paddingRight || 80);
+    if (halfW === 0) { requestAnimationFrame(measure); return; }
+    loop();
+  }
+  function loop() {
+    x -= speed;
+    if (-x >= halfW) x = 0;
+    inner.style.transform = `translateY(-50%) translateX(${x}px)`;
+    alertAnim = requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(measure);
+}
+async function fetchAlerts() {
+  try {
+    const r = await fetch('/api/alerts');
+    if (!r.ok) throw new Error('alerts http ' + r.status);
+    const d = await r.json();
+    if (d.features && d.features.length > 0) {
+      const a = d.features[0].properties;
+      const text = (a.event + ' / ' + (a.headline || '')).toUpperCase();
+      document.getElementById('alertText').textContent = text;
+      document.getElementById('alertText2').textContent = text;
+      const banner = document.getElementById('alertBanner');
+      const wasActive = banner.classList.contains('active');
+      banner.classList.add('active');
+      if (!wasActive) startAlertScroll();
+    } else {
+      document.getElementById('alertBanner').classList.remove('active');
+      cancelAnimationFrame(alertAnim);
+    }
+  } catch (e) { console.error('alerts err', e); }
+}
+
+// ============ RADAR (RainViewer + CartoDB basemap, interactive) ============
+const radarState = {
+  frames: [],          // RainViewer frame metadata
+  idx: 0,              // current frame index
+  zoom: 7,             // tile zoom level (5..9)
+  color: 4,            // RainViewer color scheme (4=Universal Blue default)
+  speed: 600,          // ms per frame
+  playing: true,
+  anim: null
+};
+
+// equirectangular tile math
+function lonToTileX(lon, z) { return Math.floor(((lon + 180) / 360) * Math.pow(2, z)); }
+function latToTileY(lat, z) {
+  const r = lat * Math.PI / 180;
+  return Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * Math.pow(2, z));
+}
+
+// approximate radius covered by a single zoom-level tile at Tulsa's latitude
+function radiusForZoom(z) {
+  // Web Mercator: 1 tile at zoom z spans 360/2^z degrees of longitude
+  // At Tulsa latitude (36°), 1 deg lon ≈ 89.3 km
+  const degPerTile = 360 / Math.pow(2, z);
+  return Math.round(degPerTile * 89.3 / 2); // half-tile radius
+}
+
+function buildBasemap() {
+  const z = radarState.zoom;
+  const x = lonToTileX(TULSA.lon, z);
+  const y = latToTileY(TULSA.lat, z);
+  const isLight = document.body.classList.contains('theme-light');
+  const style = isLight ? 'light_nolabels' : 'dark_nolabels';
+  const url = `https://a.basemaps.cartocdn.com/${style}/${z}/${x}/${y}.png`;
+  document.getElementById('radarBase').style.backgroundImage = `url("${url}")`;
+  // update label to reflect current radius
+  const km = radiusForZoom(z);
+  document.getElementById('radarLabel').textContent = `TULSA · ${km}KM`;
+}
+
+async function fetchRadar() {
+  try {
+    const r = await fetch('/api/radar');
+    if (!r.ok) throw new Error('rv http');
+    const d = await r.json();
+    let past = (d.radar && d.radar.past) ? d.radar.past.slice(-10) : [];
+    let nowcast = (d.radar && d.radar.nowcast) ? d.radar.nowcast.slice(0, 3) : [];
+    radarState.frames = past.concat(nowcast);
+    if (radarState.frames.length === 0) return;
+
+    // start at the most recent past frame (last index of past array)
+    radarState.idx = Math.max(0, past.length - 1);
+
+    document.getElementById('radarUpdated').textContent = `UPD ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+    document.getElementById('radarFrameCount').textContent = `${past.length}+${nowcast.length} FRAMES`;
+
+    renderScrubTicks(past.length, nowcast.length);
+    showRadarFrame(radarState.idx);
+    if (radarState.playing) startRadarLoop();
+  } catch (e) {
+    console.error('radar err', e);
+    document.getElementById('radarUpdated').textContent = 'OFFLINE';
+  }
+}
+
+function showRadarFrame(i) {
+  const f = radarState.frames[i];
+  if (!f) return;
+  const z = radarState.zoom;
+  const x = lonToTileX(TULSA.lon, z);
+  const y = latToTileY(TULSA.lat, z);
+  const url = `https://tilecache.rainviewer.com${f.path}/256/${z}/${x}/${y}/${radarState.color}/1_1.png`;
+  const precip = document.getElementById('radarPrecip');
+  precip.style.backgroundImage = `url("${url}")`;
+  precip.classList.add('show');
+
+  // labels
+  const ts = new Date(f.time * 1000);
+  const isFuture = ts.getTime() > Date.now();
+  const label = `${isFuture ? '→' : ''}${pad(ts.getHours())}:${pad(ts.getMinutes())}`;
+  document.getElementById('radarFrame').textContent = label;
+  document.getElementById('radarTimeLabel').textContent = label;
+
+  // scrubber position
+  const total = radarState.frames.length;
+  const pct = total > 1 ? (i / (total - 1)) * 100 : 0;
+  document.getElementById('radarScrubKnob').style.left = `${pct}%`;
+  document.getElementById('radarScrubFill').style.width = `calc(${pct}% - 0px)`;
+}
+
+function startRadarLoop() {
+  cancelAnimationFrame(radarState.anim);
+  let lastTick = performance.now();
+  function step(now) {
+    if (!radarState.playing) return;
+    if (now - lastTick > radarState.speed) {
+      radarState.idx = (radarState.idx + 1) % radarState.frames.length;
+      showRadarFrame(radarState.idx);
+      lastTick = now;
+    }
+    radarState.anim = requestAnimationFrame(step);
+  }
+  radarState.anim = requestAnimationFrame(step);
+}
+
+function stopRadarLoop() {
+  radarState.playing = false;
+  cancelAnimationFrame(radarState.anim);
+  document.getElementById('radarPlayIcon').textContent = '▶';
+}
+
+function resumeRadarLoop() {
+  radarState.playing = true;
+  document.getElementById('radarPlayIcon').textContent = '▌▌';
+  startRadarLoop();
+}
+
+function renderScrubTicks(pastCount, nowcastCount) {
+  const ticks = document.getElementById('radarScrubTicks');
+  ticks.innerHTML = '';
+  const total = pastCount + nowcastCount;
+  for (let i = 0; i < total; i++) {
+    const tick = document.createElement('div');
+    tick.className = 'radar-scrub-tick' + (i >= pastCount ? ' forecast' : '');
+    tick.style.left = total > 1 ? `${(i / (total - 1)) * 100}%` : '0%';
+    ticks.appendChild(tick);
+  }
+}
+
+// ============ RADAR — INTERACTIONS ============
+const radarPanel = document.getElementById('radarPanel');
+const radarClose = document.getElementById('radarClose');
+const radarPlay = document.getElementById('radarPlay');
+const radarScrub = document.getElementById('radarScrub');
+
+// Click panel to expand (but ignore clicks on controls/close/scrub when already expanded)
+radarPanel.addEventListener('click', (e) => {
+  if (radarPanel.classList.contains('expanded')) return;
+  if (e.target.closest('.radar-controls')) return;
+  expandRadar();
+});
+
+function expandRadar() {
+  radarPanel.classList.add('expanded');
+}
+function collapseRadar() {
+  radarPanel.classList.remove('expanded');
+}
+radarClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  collapseRadar();
+});
+
+// Esc closes the expanded radar
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && radarPanel.classList.contains('expanded')) {
+    collapseRadar();
+  }
+});
+
+// Play/pause
+radarPlay.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (radarState.playing) stopRadarLoop();
+  else resumeRadarLoop();
+});
+
+// Zoom buttons
+document.querySelectorAll('[data-zoom]').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const z = parseInt(b.dataset.zoom, 10);
+    radarState.zoom = z;
+    document.querySelectorAll('[data-zoom]').forEach(o => o.classList.toggle('active', o === b));
+    document.getElementById('radarZoomLabel').textContent = b.textContent;
+    buildBasemap();
+    showRadarFrame(radarState.idx);
+  });
+});
+
+// Color buttons
+document.querySelectorAll('[data-color]').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    radarState.color = parseInt(b.dataset.color, 10);
+    document.querySelectorAll('[data-color]').forEach(o => o.classList.toggle('active', o === b));
+    showRadarFrame(radarState.idx);
+  });
+});
+
+// Speed buttons
+document.querySelectorAll('[data-speed]').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    radarState.speed = parseInt(b.dataset.speed, 10);
+    document.querySelectorAll('[data-speed]').forEach(o => o.classList.toggle('active', o === b));
+  });
+});
+
+// Scrubber — click + drag
+let scrubbing = false;
+function scrubAt(clientX) {
+  const rect = radarScrub.getBoundingClientRect();
+  let pct = (clientX - rect.left) / rect.width;
+  pct = Math.max(0, Math.min(1, pct));
+  const total = radarState.frames.length;
+  if (total === 0) return;
+  const idx = Math.round(pct * (total - 1));
+  radarState.idx = idx;
+  showRadarFrame(idx);
+}
+radarScrub.addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  scrubbing = true;
+  stopRadarLoop();
+  radarScrub.setPointerCapture(e.pointerId);
+  scrubAt(e.clientX);
+});
+radarScrub.addEventListener('pointermove', (e) => {
+  if (!scrubbing) return;
+  scrubAt(e.clientX);
+});
+radarScrub.addEventListener('pointerup', () => { scrubbing = false; });
+radarScrub.addEventListener('pointercancel', () => { scrubbing = false; });
+
+// ============ AVIATION (OpenSky) ============
+async function fetchAviation() {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    const r = await fetch('/api/aviation', { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error('av http ' + r.status);
+    const d = await r.json();
+    const flying = d.states || [];
+
+    document.getElementById('avCount').textContent = flying.length;
+    document.getElementById('avUpdated').textContent = `UPD ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+
+    const list = document.getElementById('avList');
+    if (flying.length === 0) {
+      list.innerHTML = '<div class="av-empty">NO AIRCRAFT NEARBY</div>';
+      return;
+    }
+
+    // sort by altitude descending; show top 6
+    flying.sort((a, b) => (b.altMeters || 0) - (a.altMeters || 0));
+    list.innerHTML = '';
+    flying.slice(0, 6).forEach(s => {
+      const callsign = (s.callsign || s.icao || '———').trim().toUpperCase();
+      const altFt = Math.round((s.altMeters || 0) * 3.28084 / 1000);
+      const heading = s.heading != null ? s.heading : 0;
+      const row = document.createElement('div');
+      row.className = 'av-row';
+      row.innerHTML = `
+        <span class="call">${callsign}</span>
+        <span class="arrow" style="display:inline-block;transform:rotate(${heading}deg)">↑</span>
+        <span class="alt">${altFt}K FT</span>
+      `;
+      list.appendChild(row);
+    });
+  } catch (e) {
+    console.error('aviation err', e);
+    document.getElementById('avList').innerHTML = '<div class="av-empty">FEED OFFLINE — RETRY 30S</div>';
+  }
+}
+
+// ============ CALENDAR (US Federal Holidays + observances) ============
+// Computed dates for 2026; these are well-known fixed and floating dates
+function nthWeekday(year, month, weekday, n) {
+  // weekday 0=Sun..6=Sat; n = 1..5 (1st, 2nd, ...)
+  const first = new Date(year, month, 1);
+  const offset = (weekday - first.getDay() + 7) % 7;
+  return new Date(year, month, 1 + offset + (n - 1) * 7);
+}
+function lastWeekday(year, month, weekday) {
+  // last weekday of month
+  const last = new Date(year, month + 1, 0);
+  const offset = (last.getDay() - weekday + 7) % 7;
+  return new Date(year, month, last.getDate() - offset);
+}
+function buildHolidays(year) {
+  return [
+    { name: "NEW YEAR'S DAY",       date: new Date(year, 0, 1) },
+    { name: "MLK DAY",              date: nthWeekday(year, 0, 1, 3) },     // 3rd Mon Jan
+    { name: "VALENTINE'S DAY",      date: new Date(year, 1, 14) },
+    { name: "PRESIDENTS DAY",       date: nthWeekday(year, 1, 1, 3) },     // 3rd Mon Feb
+    { name: "ST PATRICK'S DAY",     date: new Date(year, 2, 17) },
+    { name: "EARTH DAY",            date: new Date(year, 3, 22) },
+    { name: "MOTHER'S DAY",         date: nthWeekday(year, 4, 0, 2) },     // 2nd Sun May
+    { name: "MEMORIAL DAY",         date: lastWeekday(year, 4, 1) },       // last Mon May
+    { name: "FATHER'S DAY",         date: nthWeekday(year, 5, 0, 3) },     // 3rd Sun Jun
+    { name: "JUNETEENTH",           date: new Date(year, 5, 19) },
+    { name: "INDEPENDENCE DAY",     date: new Date(year, 6, 4) },
+    { name: "LABOR DAY",            date: nthWeekday(year, 8, 1, 1) },     // 1st Mon Sep
+    { name: "COLUMBUS DAY",         date: nthWeekday(year, 9, 1, 2) },     // 2nd Mon Oct
+    { name: "HALLOWEEN",            date: new Date(year, 9, 31) },
+    { name: "VETERANS DAY",         date: new Date(year, 10, 11) },
+    { name: "THANKSGIVING",         date: nthWeekday(year, 10, 4, 4) },    // 4th Thu Nov
+    { name: "CHRISTMAS EVE",        date: new Date(year, 11, 24) },
+    { name: "CHRISTMAS DAY",        date: new Date(year, 11, 25) },
+    { name: "NEW YEAR'S EVE",       date: new Date(year, 11, 31) },
+  ];
+}
+
+function renderCalendar() {
+  const now = new Date();
+  // build a 14-month window of holidays so we always have upcoming items even in late December
+  const all = [...buildHolidays(now.getFullYear()), ...buildHolidays(now.getFullYear() + 1)];
+  const upcoming = all
+    .filter(h => h.date.getTime() >= now.setHours(0,0,0,0))
+    .sort((a, b) => a.date - b.date)
+    .slice(0, 6);
+  if (upcoming.length === 0) return;
+
+  const main = upcoming[0];
+  const days = Math.round((main.date - new Date(new Date().setHours(0,0,0,0))) / (1000 * 60 * 60 * 24));
+
+  document.getElementById('calMainName').textContent = main.name;
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const days_short = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  document.getElementById('calMainDate').textContent = `${days_short[main.date.getDay()]} / ${pad(main.date.getDate())} ${months[main.date.getMonth()]}`;
+
+  let countText, unit;
+  if (days === 0) { countText = 'TODAY'; unit = ''; }
+  else if (days === 1) { countText = '1'; unit = 'DAY'; }
+  else { countText = days; unit = 'DAYS'; }
+  document.getElementById('calMainCount').innerHTML = unit ? `${countText} <span class="unit">${unit}</span>` : `<span style="font-size:24px">${countText}</span>`;
+
+  // remaining list
+  const list = document.getElementById('calList');
+  list.innerHTML = '';
+  upcoming.slice(1, 5).forEach(h => {
+    const d = Math.round((h.date - new Date(new Date().setHours(0,0,0,0))) / (1000 * 60 * 60 * 24));
+    const row = document.createElement('div');
+    row.className = 'cal-row';
+    row.innerHTML = `<span class="name">${h.name}</span><span class="when">${d}D</span>`;
+    list.appendChild(row);
+  });
+}
+
+// ============ THEME ============
+const sliderTrack = document.getElementById('sliderTrack');
+const darkLabel = document.getElementById('darkLabel');
+const lightLabel = document.getElementById('lightLabel');
+function setTheme(mode) {
+  document.body.classList.remove('theme-dark', 'theme-light');
+  document.body.classList.add(`theme-${mode}`);
+  darkLabel.classList.toggle('active', mode === 'dark');
+  lightLabel.classList.toggle('active', mode === 'light');
+  try { localStorage.setItem(SP + 'theme', mode); } catch (e) {}
+  buildBasemap(); // theme-aware basemap
+}
+function toggleTheme() {
+  setTheme(document.body.classList.contains('theme-light') ? 'dark' : 'light');
+}
+sliderTrack.addEventListener('click', toggleTheme);
+darkLabel.addEventListener('click', () => setTheme('dark'));
+lightLabel.addEventListener('click', () => setTheme('light'));
+let dragging = false;
+sliderTrack.addEventListener('pointerdown', (e) => { dragging = true; sliderTrack.setPointerCapture(e.pointerId); });
+sliderTrack.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const rect = sliderTrack.getBoundingClientRect();
+  setTheme((e.clientX - rect.left) > rect.width / 2 ? 'light' : 'dark');
+});
+sliderTrack.addEventListener('pointerup', () => { dragging = false; });
+try {
+  const saved = localStorage.getItem(SP + 'theme');
+  if (saved) setTheme(saved);
+} catch (e) {}
+
+// ============ DASHBOARD MESSAGE STRIP ============
+const msgStrip = document.getElementById('msgStrip');
+const msgStripInner = document.getElementById('msgStripInner');
+let msgAnim = null;
+function startStripScroll() {
+  cancelAnimationFrame(msgAnim);
+  const s1 = msgStripInner.querySelector('span');
+  let x = 0, halfW = 0;
+  const speed = 0.7;
+  function measure() {
+    halfW = s1.offsetWidth + parseInt(getComputedStyle(s1).paddingRight || 80);
+    if (halfW === 0) { requestAnimationFrame(measure); return; }
+    loop();
+  }
+  function loop() {
+    x -= speed;
+    if (-x >= halfW) x = 0;
+    msgStripInner.style.transform = `translateY(-50%) translateX(${x}px)`;
+    msgAnim = requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(measure);
+}
+function setDashboardMessage(text) {
+  if (!text) {
+    msgStrip.classList.remove('active');
+    cancelAnimationFrame(msgAnim);
+    return;
+  }
+  const upper = text.toUpperCase();
+  msgStripInner.innerHTML = '';
+  const s1 = document.createElement('span'); s1.textContent = upper;
+  const s2 = document.createElement('span'); s2.textContent = upper;
+  msgStripInner.appendChild(s1);
+  msgStripInner.appendChild(s2);
+  msgStrip.classList.add('active');
+  startStripScroll();
+}
+function loadSavedMessage() {
+  try {
+    const saved = localStorage.getItem(SP + 'message');
+    if (saved && saved.trim()) setDashboardMessage(saved);
+  } catch (e) {}
+}
+function saveMessage(text) {
+  try {
+    if (text && text.trim()) localStorage.setItem(SP + 'message', text);
+    else localStorage.removeItem(SP + 'message');
+  } catch (e) {}
+}
+function clearSavedMessage() {
+  try { localStorage.removeItem(SP + 'message'); } catch (e) {}
+  setDashboardMessage('');
+}
+
+// ============ AWAY MODE ============
+const awayOverlay = document.getElementById('awayOverlay');
+const awayBtn = document.getElementById('awayBtn');
+const awayInputWrap = document.getElementById('awayInputWrap');
+const awayInput = document.getElementById('awayInput');
+const awayTickerWrap = document.getElementById('awayTickerWrap');
+const awayTicker = document.getElementById('awayTicker');
+const awayEditBtn = document.getElementById('awayEditBtn');
+let awayTickerAnim = null;
+function showInputMode(prefill) {
+  awayInputWrap.classList.remove('hidden');
+  awayTickerWrap.classList.remove('active');
+  awayEditBtn.classList.remove('active');
+  cancelAnimationFrame(awayTickerAnim);
+  awayInput.value = prefill || '';
+  setTimeout(() => awayInput.focus(), 50);
+}
+function showTickerMode(text) {
+  awayInputWrap.classList.add('hidden');
+  awayTickerWrap.classList.add('active');
+  awayEditBtn.classList.add('active');
+  const upper = text.toUpperCase();
+  awayTicker.innerHTML = '';
+  const s1 = document.createElement('span'); s1.textContent = upper;
+  const s2 = document.createElement('span'); s2.textContent = upper;
+  awayTicker.appendChild(s1);
+  awayTicker.appendChild(s2);
+  let x = 0, halfW = 0;
+  const speed = 1.6;
+  function measure() {
+    halfW = s1.offsetWidth + parseInt(getComputedStyle(s1).paddingRight || 200);
+    if (halfW === 0) { requestAnimationFrame(measure); return; }
+    loop();
+  }
+  function loop() {
+    x -= speed;
+    if (-x >= halfW) x = 0;
+    awayTicker.style.transform = `translateY(-50%) translateX(${x}px)`;
+    awayTickerAnim = requestAnimationFrame(loop);
+  }
+  cancelAnimationFrame(awayTickerAnim);
+  requestAnimationFrame(measure);
+}
+function startAway() {
+  awayOverlay.classList.add('active');
+  let saved = '';
+  try { saved = localStorage.getItem(SP + 'message') || ''; } catch (e) {}
+  if (saved && saved.trim()) showTickerMode(saved);
+  else showInputMode('');
+}
+function stopAway() {
+  awayOverlay.classList.remove('active');
+  cancelAnimationFrame(awayTickerAnim);
+}
+awayBtn.addEventListener('click', startAway);
+awayOverlay.addEventListener('click', (e) => {
+  if (e.target.closest('.away-input-wrap')) return;
+  if (e.target.closest('#awayEditBtn')) return;
+  stopAway();
+});
+awayEditBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  let current = '';
+  try { current = localStorage.getItem(SP + 'message') || ''; } catch (e2) {}
+  showInputMode(current);
+});
+awayInput.addEventListener('keydown', (e) => {
+  e.stopPropagation();
+  if (e.key === 'Enter') {
+    const text = awayInput.value.trim();
+    if (text) {
+      saveMessage(text);
+      setDashboardMessage(text);
+      showTickerMode(text);
+    } else {
+      clearSavedMessage();
+      stopAway();
+    }
+  } else if (e.key === 'Escape') stopAway();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && awayOverlay.classList.contains('active')) {
+    if (document.activeElement === awayInput) return;
+    stopAway();
+  }
+});
+
+// ============ BOOT ============
+tickClock();
+setInterval(tickClock, 1000);
+
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
+
+fetchISS();
+setInterval(fetchISS, 5000);
+
+fetchAlerts();
+setInterval(fetchAlerts, 5 * 60 * 1000);
+
+buildBasemap();
+fetchRadar();
+setInterval(fetchRadar, 5 * 60 * 1000);
+
+fetchAviation();
+setInterval(fetchAviation, 30 * 1000);
+
+renderCalendar();
+setInterval(renderCalendar, 60 * 60 * 1000);
+
+loadSavedMessage();
+</script>
+
+</body>
+</html>
