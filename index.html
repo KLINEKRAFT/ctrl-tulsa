@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CTRL // TULSA — RAMS EDITION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- GridStack: vanilla draggable/resizable grid -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+
+<style>
+/* =========================================================
+   CTRL // TULSA — RAMS EDITION
+   "Less, but better" — Dieter Rams
+   ---------------------------------------------------------
+   - Achromatic ground (Braun product palette: warm paper grey / near-black)
+   - Single accent: Braun orange #ed8008 (ET66 calculator key)
+   - Strict 12-column grid, hairline rules (Ulm / Akzidenz grammar)
+   - Numbered panels [01]..[NN] — every product has a model number
+   - No neumorphism, no glow, no glass, no gradients
+   ========================================================= */
+
+:root,
+[data-theme="light"] {
+  --bg:         #e1ddd5;
+  --surface:    #ebe7df;
+  --surface-2:  #d4cfc4;
+  --rule:       #b8b1a4;
+  --rule-soft:  #cac3b5;
+
+  --ink:        #1a1a18;
+  --ink-soft:   #5a574f;
+  --ink-faint:  #8c887d;
+
+  --accent:     #ed8008;
+  --accent-soft:#ed800822;
+
+  --ok:         #555047;
+  --warn:       #ed8008;
+  --alert:      #bf1b1b;
+}
+
+[data-theme="dark"] {
+  --bg:         #131312;
+  --surface:    #1c1c1a;
+  --surface-2:  #0e0e0d;
+  --rule:       #2e2d2a;
+  --rule-soft:  #232220;
+
+  --ink:        #e8e4dc;
+  --ink-soft:   #98948a;
+  --ink-faint:  #5a574f;
+
+  --accent:     #ed8008;
+  --accent-soft:#ed800822;
+
+  --ok:         #98948a;
+  --warn:       #ed8008;
+  --alert:      #d44a3f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { min-height: 100%; overflow-x: hidden; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0; }
+
+.app {
+  min-height: 100vh;
+  padding: 24px 28px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.topbar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.brand { display: flex; align-items: center; gap: 14px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+.brand-mark { display: flex; align-items: center; gap: 8px; }
+.brand-dot { width: 9px; height: 9px; background: var(--accent); border-radius: 50%; flex: 0 0 auto; }
+.brand-sep { width: 1px; height: 14px; background: var(--rule); }
+.brand-sub { color: var(--ink-soft); font-weight: 500; }
+.topbar-center { display: flex; justify-content: center; }
+.away-banner { display: none; align-items: center; gap: 14px; padding: 6px 14px; border: 1px solid var(--accent); background: var(--accent-soft); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
+.away-banner.on { display: inline-flex; }
+.away-banner .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.away-banner .msg { max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-right { display: flex; align-items: center; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); }
+.tb-btn { background: transparent; border: 1px solid var(--rule); color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 7px 12px; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+.tb-btn:hover { border-color: var(--ink); }
+.tb-btn.accent { border-color: var(--accent); color: var(--accent); }
+.tb-btn.accent:hover { background: var(--accent); color: #fff; }
+.theme-segment { display: inline-flex; border: 1px solid var(--rule); }
+.theme-segment button { background: transparent; border: 0; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 7px 12px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.theme-segment button:first-child { border-right: 1px solid var(--rule); }
+.theme-segment button.active { background: var(--ink); color: var(--bg); }
+
+/* ===== GRIDSTACK + PANELS ===== */
+.grid-stack { background: transparent; }
+.grid-stack > .grid-stack-item > .grid-stack-item-content { inset: 4px; overflow: hidden; background: transparent !important; }
+.grid-stack > .grid-stack-placeholder > .placeholder-content { background: transparent; border: 1px dashed var(--accent); inset: 4px; }
+.grid-stack-item > .ui-resizable-handle { background-image: none !important; }
+.grid-stack-item > .ui-resizable-se { width: 14px; height: 14px; bottom: 4px; right: 4px; opacity: 0; transition: opacity 0.2s; }
+.grid-stack-item > .ui-resizable-se::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 50%, var(--ink-soft) 50%, var(--ink-soft) 60%, transparent 60%, transparent 70%, var(--ink-soft) 70%, var(--ink-soft) 80%, transparent 80%); }
+body.edit-mode .grid-stack-item > .ui-resizable-handle { opacity: 1 !important; }
+
+.panel { position: relative; height: 100%; background: var(--surface); border: 1px solid var(--rule); display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.15s; }
+body.edit-mode .panel { border-color: var(--accent); cursor: move; }
+
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 12px; border-bottom: 1px solid var(--rule); flex-shrink: 0; }
+.panel-num { display: inline-flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); }
+.panel-num .n { display: inline-block; min-width: 22px; padding: 2px 5px; background: var(--ink); color: var(--bg); font-weight: 600; text-align: center; letter-spacing: 0.1em; }
+.panel-num .label { color: var(--ink); font-weight: 600; }
+.panel-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+
+.panel-body { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; min-height: 0; }
+
+/* TIME PANEL */
+.time-stack { display: flex; flex-direction: column; gap: 14px; height: 100%; justify-content: center; }
+.time-big { font-family: 'JetBrains Mono', monospace; font-weight: 300; font-size: clamp(40px, 7vw, 88px); line-height: 1; letter-spacing: -0.02em; color: var(--ink); display: flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums; }
+.time-big .colon { color: var(--accent); margin: 0 -2px; animation: blink 2s steps(2, start) infinite; }
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0.3; } }
+.time-big .ampm { font-size: 0.3em; margin-left: 12px; color: var(--ink-soft); letter-spacing: 0.15em; font-weight: 500; }
+.time-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.time-cell { background: var(--surface); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.time-cell .k { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+.time-cell .v { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); font-weight: 500; }
+
+/* WEATHER PANEL */
+.wx-main { display: flex; align-items: center; gap: 18px; }
+.wx-icon { width: 56px; height: 56px; flex: 0 0 auto; color: var(--accent); }
+.wx-icon svg { width: 100%; height: 100%; }
+.wx-temp { display: flex; flex-direction: column; }
+.wx-num { font-family: 'JetBrains Mono', monospace; font-weight: 300; font-size: clamp(36px, 5vw, 56px); line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; }
+.wx-num .deg { font-size: 0.4em; color: var(--ink-soft); margin-left: 4px; }
+.wx-cond { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin-top: 6px; }
+.wx-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.wx-cell { background: var(--surface); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.wx-cell .k { color: var(--ink-faint); letter-spacing: 0.15em; text-transform: uppercase; font-size: 9px; }
+.wx-cell .v { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* HOURLY PANEL */
+.hourly-scroll { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; height: 100%; padding-bottom: 4px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.hourly-scroll::-webkit-scrollbar { height: 4px; }
+.hourly-scroll::-webkit-scrollbar-track { background: transparent; }
+.hourly-scroll::-webkit-scrollbar-thumb { background: var(--rule); }
+.hr-tick { flex: 0 0 64px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 6px; border: 1px solid var(--rule); background: var(--surface); gap: 8px; }
+.hr-tick.now { border-color: var(--accent); background: var(--accent-soft); }
+.hr-tick .hr-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+.hr-tick.now .hr-time { color: var(--accent); font-weight: 600; }
+.hr-tick .hr-icon { width: 22px; height: 22px; color: var(--ink-soft); }
+.hr-tick .hr-icon svg { width: 100%; height: 100%; }
+.hr-tick .hr-temp { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* AWAY PANEL */
+.away-panel { display: flex; flex-direction: column; height: 100%; gap: 14px; }
+.away-status { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); }
+.away-status .indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-faint); }
+.away-panel.active .away-status .indicator { background: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+.away-panel.active .away-status .label-on { color: var(--accent); }
+.away-message { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; min-height: 0; }
+.away-message-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+.away-message-text { font-family: 'Inter', sans-serif; font-weight: 500; font-size: clamp(18px, 3vw, 36px); line-height: 1.15; color: var(--ink); letter-spacing: -0.015em; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.away-panel.active .away-message-text { color: var(--accent); }
+.away-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.away-actions input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--rule); padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink); outline: none; }
+.away-actions input:focus { border-color: var(--accent); }
+.away-actions input::placeholder { color: var(--ink-faint); }
+
+/* SYSTEM PANEL */
+.sys-list { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.sys-row { background: var(--surface); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.sys-row .k { color: var(--ink-faint); letter-spacing: 0.15em; text-transform: uppercase; font-size: 9px; }
+.sys-row .v { color: var(--ink); font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.sys-row .v .dot { width: 6px; height: 6px; background: var(--ok); border-radius: 50%; }
+
+/* LAYOUT CONTROLS */
+.layout-controls { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+.layout-controls .lc-btn { width: 100%; background: transparent; border: 1px solid var(--rule); color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+.layout-controls .lc-btn:hover { border-color: var(--ink); }
+.layout-controls .lc-btn.accent { border-color: var(--accent); color: var(--accent); }
+.layout-controls .lc-btn.accent.active { background: var(--accent); color: #fff; }
+.layout-controls .lc-btn .arrow { font-family: 'JetBrains Mono', monospace; opacity: 0.6; }
+.layout-controls .lc-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.layout-controls .lc-presets button { background: transparent; border: 1px solid var(--rule); color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; padding: 10px 8px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+.layout-controls .lc-presets button:hover { border-color: var(--ink); color: var(--ink); }
+
+/* FOOTER */
+.footer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding-top: 14px; border-top: 1px solid var(--rule); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+.footer .center { text-align: center; display: flex; justify-content: center; gap: 12px; align-items: center; }
+.footer .center .sep { width: 1px; height: 10px; background: var(--rule); }
+.footer .right { text-align: right; }
+
+/* AWAY OVERLAY */
+.away-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; padding: 48px; opacity: 0; transition: opacity 0.4s ease; }
+.away-overlay.on { display: flex; opacity: 1; }
+.ao-top { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); }
+.ao-top .ao-tag { color: var(--accent); }
+.ao-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.ao-clock { font-family: 'JetBrains Mono', monospace; font-weight: 200; font-size: clamp(80px, 18vw, 240px); line-height: 1; color: var(--ink); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.ao-clock .colon { color: var(--accent); animation: blink 2s steps(2, start) infinite; }
+.ao-msg { font-family: 'Inter', sans-serif; font-weight: 500; font-size: clamp(28px, 5vw, 64px); line-height: 1.1; color: var(--accent); letter-spacing: -0.02em; max-width: 100%; word-wrap: break-word; }
+.ao-edit { width: 100%; }
+.ao-input { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 16px 0; font-family: 'Inter', sans-serif; font-weight: 500; font-size: clamp(20px, 3vw, 36px); color: var(--ink); outline: none; }
+.ao-input:focus { border-bottom-color: var(--accent); }
+.ao-input::placeholder { color: var(--ink-faint); }
+.ao-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); margin-top: 12px; }
+.ao-bottom { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* KLINEKRAFT CORNER */
+.kk-corner { position: fixed; bottom: 14px; right: 18px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 9px; letter-spacing: 0.3em; color: var(--ink-faint); opacity: 0.6; pointer-events: none; z-index: 999; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .app { padding: 16px; gap: 14px; }
+  .topbar { grid-template-columns: 1fr auto; gap: 12px; }
+  .topbar-center { display: none; }
+  .topbar-right .tb-btn-text { display: none; }
+  .footer { grid-template-columns: 1fr; text-align: center; gap: 6px; }
+  .footer .center, .footer .right { justify-content: center; text-align: center; }
+}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="brand-dot"></span>
+        <span>KLINEKRAFT</span>
+      </div>
+      <div class="brand-sep"></div>
+      <span class="brand-sub">CTRL // TULSA</span>
+      <div class="brand-sep"></div>
+      <span class="brand-sub mono">● LIVE</span>
+    </div>
+
+    <div class="topbar-center">
+      <div class="away-banner" id="awayBanner">
+        <span class="dot"></span>
+        <span>AWAY</span>
+        <span class="msg" id="awayBannerMsg">—</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="theme-segment" id="themeSegment">
+        <button data-theme-set="light" class="active">Light</button>
+        <button data-theme-set="dark">Dark</button>
+      </div>
+      <button class="tb-btn" id="editBtn">
+        <span class="tb-btn-text">EDIT LAYOUT</span>
+        <span>⤢</span>
+      </button>
+      <span class="mono" id="topClock">--:-- --</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid-stack" id="grid"></div>
+  </main>
+
+  <footer class="footer">
+    <span>KLINEKRAFT // CTRL.TULSA</span>
+    <span class="center">
+      <span>V5.0</span>
+      <span class="sep"></span>
+      <span>RAMS EDITION</span>
+      <span class="sep"></span>
+      <span id="footerLoc">TULSA, OK</span>
+    </span>
+    <span class="right" id="footerStatus">UPTIME 00:00:00</span>
+  </footer>
+</div>
+
+<div class="away-overlay" id="awayOverlay">
+  <div class="ao-top">
+    <span class="ao-tag">// AWAY MODE</span>
+    <span>PRESS ESC TO EXIT</span>
+  </div>
+  <div class="ao-body">
+    <div class="ao-clock" id="aoClock">--:--</div>
+    <div class="ao-msg" id="aoMsg">—</div>
+    <div class="ao-edit">
+      <input class="ao-input" id="aoInput" type="text" placeholder="Type your away message…" maxlength="200" />
+      <div class="ao-hint">EDIT ABOVE • CHANGES SAVE AUTOMATICALLY</div>
+    </div>
+  </div>
+  <div class="ao-bottom">
+    <span id="aoDate">—</span>
+    <span>KLINEKRAFT // CTRL.TULSA</span>
+  </div>
+</div>
+
+<div class="kk-corner">KLINEKRAFT</div>
+
+<template id="tpl-time">
+  <div class="panel" data-panel="time">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">01</span><span class="label">LOCAL TIME</span></span>
+      <span class="panel-meta">N 36.15 / W 95.99</span>
+    </div>
+    <div class="panel-body">
+      <div class="time-stack">
+        <div class="time-big" id="bigClock">
+          <span id="bcH">12</span><span class="colon">:</span><span id="bcM">00</span><span class="colon">:</span><span id="bcS">00</span><span class="ampm" id="bcA">AM</span>
+        </div>
+        <div class="time-meta">
+          <div class="time-cell"><span class="k">Date</span><span class="v" id="bcDate">—</span></div>
+          <div class="time-cell"><span class="k">Timezone</span><span class="v" id="bcTz">CDT</span></div>
+          <div class="time-cell"><span class="k">Day / 365</span><span class="v" id="bcDoy">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-weather">
+  <div class="panel" data-panel="weather">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">02</span><span class="label">WEATHER</span></span>
+      <span class="panel-meta" id="wxUpdated">— —</span>
+    </div>
+    <div class="panel-body">
+      <div class="wx-main">
+        <div class="wx-icon" id="wxIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </div>
+        <div class="wx-temp">
+          <div class="wx-num"><span id="wxTemp">--</span><span class="deg">°F</span></div>
+          <div class="wx-cond" id="wxCond">LOADING</div>
+        </div>
+      </div>
+      <div class="wx-grid">
+        <div class="wx-cell"><span class="k">Feels</span><span class="v"><span id="wxFeels">—</span>°</span></div>
+        <div class="wx-cell"><span class="k">Wind</span><span class="v" id="wxWind">—</span></div>
+        <div class="wx-cell"><span class="k">Humidity</span><span class="v" id="wxHum">—</span></div>
+        <div class="wx-cell"><span class="k">UV Index</span><span class="v" id="wxUv">—</span></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-hourly">
+  <div class="panel" data-panel="hourly">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">03</span><span class="label">HOURLY // 12H</span></span>
+      <span class="panel-meta" id="hxUpdated">— —</span>
+    </div>
+    <div class="panel-body">
+      <div class="hourly-scroll" id="hourlyTrack"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-away">
+  <div class="panel" data-panel="away">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">04</span><span class="label">AWAY MESSAGE</span></span>
+      <span class="panel-meta" id="awayMeta">STANDBY</span>
+    </div>
+    <div class="panel-body">
+      <div class="away-panel" id="awayPanel">
+        <div class="away-status">
+          <span class="indicator"></span>
+          <span class="label-off">OFFLINE</span>
+          <span class="label-on" style="display:none">BROADCASTING</span>
+        </div>
+        <div class="away-message">
+          <div class="away-message-label">CURRENT MESSAGE</div>
+          <div class="away-message-text" id="awayMessageText">No message set</div>
+        </div>
+        <div class="away-actions">
+          <input id="awayInlineInput" type="text" placeholder="Set away message…" maxlength="200" />
+          <button class="tb-btn accent" id="awayToggleBtn">
+            <span id="awayToggleLabel">ACTIVATE</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-system">
+  <div class="panel" data-panel="system">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">05</span><span class="label">SYSTEM</span></span>
+      <span class="panel-meta">SYS / OK</span>
+    </div>
+    <div class="panel-body">
+      <div class="sys-list">
+        <div class="sys-row"><span class="k">Status</span><span class="v"><span class="dot"></span>ONLINE</span></div>
+        <div class="sys-row"><span class="k">Build</span><span class="v">CTRL 5.0</span></div>
+        <div class="sys-row"><span class="k">Mode</span><span class="v" id="sysMode">STANDARD</span></div>
+        <div class="sys-row"><span class="k">Uptime</span><span class="v" id="sysUptime">00:00:00</span></div>
+        <div class="sys-row"><span class="k">Theme</span><span class="v" id="sysTheme">LIGHT</span></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-layout">
+  <div class="panel" data-panel="layout">
+    <div class="panel-head">
+      <span class="panel-num"><span class="n">06</span><span class="label">LAYOUT</span></span>
+      <span class="panel-meta">CONFIG</span>
+    </div>
+    <div class="panel-body">
+      <div class="layout-controls">
+        <button class="lc-btn accent" id="lcEditBtn">
+          <span id="lcEditLabel">ENABLE EDIT MODE</span>
+          <span class="arrow">⤢</span>
+        </button>
+        <div class="lc-presets">
+          <button data-preset="default">DEFAULT</button>
+          <button data-preset="away-focus">AWAY FOCUS</button>
+          <button data-preset="weather-focus">WEATHER</button>
+          <button data-preset="compact">COMPACT</button>
+        </div>
+        <button class="lc-btn" id="lcResetBtn">
+          <span>RESET LAYOUT</span>
+          <span class="arrow">↻</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+/* ========================================================
+   CTRL // TULSA — RAMS EDITION
+   Application logic
+   ======================================================== */
+
+const STORAGE_KEY_LAYOUT   = 'ctrl.tulsa.rams.layout.v1';
+const STORAGE_KEY_THEME    = 'ctrl.tulsa.rams.theme';
+const STORAGE_KEY_AWAY     = 'ctrl.tulsa.rams.away';
+const STORAGE_KEY_AWAY_MSG = 'ctrl.tulsa.rams.away.msg';
+
+/* 12-column grid layouts. Each item: {id,x,y,w,h,minW,minH} */
+const DEFAULT_LAYOUT = [
+  { id: 'time',    x: 0, y: 0, w: 6, h: 3, minW: 4, minH: 3 },
+  { id: 'weather', x: 6, y: 0, w: 6, h: 3, minW: 4, minH: 3 },
+  { id: 'away',    x: 0, y: 3, w: 8, h: 3, minW: 5, minH: 3 },
+  { id: 'system',  x: 8, y: 3, w: 4, h: 3, minW: 3, minH: 3 },
+  { id: 'hourly',  x: 0, y: 6, w: 8, h: 2, minW: 6, minH: 2 },
+  { id: 'layout',  x: 8, y: 6, w: 4, h: 2, minW: 3, minH: 2 },
+];
+
+const PRESETS = {
+  'default': DEFAULT_LAYOUT,
+  'away-focus': [
+    { id: 'away',    x: 0, y: 0, w: 12, h: 5, minW: 5, minH: 3 },
+    { id: 'time',    x: 0, y: 5, w: 4, h: 3, minW: 4, minH: 3 },
+    { id: 'weather', x: 4, y: 5, w: 4, h: 3, minW: 4, minH: 3 },
+    { id: 'system',  x: 8, y: 5, w: 4, h: 3, minW: 3, minH: 3 },
+    { id: 'hourly',  x: 0, y: 8, w: 8, h: 2, minW: 6, minH: 2 },
+    { id: 'layout',  x: 8, y: 8, w: 4, h: 2, minW: 3, minH: 2 },
+  ],
+  'weather-focus': [
+    { id: 'weather', x: 0, y: 0, w: 8, h: 5, minW: 4, minH: 3 },
+    { id: 'time',    x: 8, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
+    { id: 'system',  x: 8, y: 3, w: 4, h: 2, minW: 3, minH: 2 },
+    { id: 'hourly',  x: 0, y: 5, w: 12, h: 2, minW: 6, minH: 2 },
+    { id: 'away',    x: 0, y: 7, w: 8, h: 3, minW: 5, minH: 3 },
+    { id: 'layout',  x: 8, y: 7, w: 4, h: 3, minW: 3, minH: 2 },
+  ],
+  'compact': [
+    { id: 'time',    x: 0, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
+    { id: 'weather', x: 4, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
+    { id: 'system',  x: 8, y: 0, w: 4, h: 3, minW: 3, minH: 3 },
+    { id: 'away',    x: 0, y: 3, w: 6, h: 3, minW: 5, minH: 3 },
+    { id: 'hourly',  x: 6, y: 3, w: 6, h: 3, minW: 6, minH: 2 },
+    { id: 'layout',  x: 0, y: 6, w: 12, h: 2, minW: 3, minH: 2 },
+  ],
+};
+
+/* Init GridStack */
+const grid = GridStack.init({
+  column: 12,
+  cellHeight: 90,
+  margin: 8,
+  float: false,
+  animate: true,
+  resizable: { handles: 'se, sw, ne, nw, e, w, s, n' },
+  disableResize: true,
+  disableDrag: true,
+});
+
+function buildLayout(layout) {
+  grid.removeAll(false);
+  document.getElementById('grid').innerHTML = '';
+  layout.forEach(item => {
+    const tpl = document.getElementById('tpl-' + item.id);
+    if (!tpl) return;
+    const content = tpl.content.firstElementChild.cloneNode(true).outerHTML;
+    grid.addWidget({
+      x: item.x, y: item.y, w: item.w, h: item.h,
+      minW: item.minW, minH: item.minH,
+      id: item.id,
+      content,
+    });
+  });
+  bindDynamicUI();
+}
+
+function loadLayout() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_LAYOUT);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return DEFAULT_LAYOUT;
+}
+
+function saveLayout() {
+  const nodes = grid.engine.nodes.map(n => ({
+    id: n.id, x: n.x, y: n.y, w: n.w, h: n.h,
+    minW: n.minW || 3, minH: n.minH || 2
+  }));
+  localStorage.setItem(STORAGE_KEY_LAYOUT, JSON.stringify(nodes));
+}
+
+grid.on('change', saveLayout);
+
+/* THEME */
+function setTheme(theme) {
+  document.body.dataset.theme = theme;
+  localStorage.setItem(STORAGE_KEY_THEME, theme);
+  document.querySelectorAll('#themeSegment button').forEach(b => {
+    b.classList.toggle('active', b.dataset.themeSet === theme);
+  });
+  const sysTheme = document.getElementById('sysTheme');
+  if (sysTheme) sysTheme.textContent = theme.toUpperCase();
+}
+document.getElementById('themeSegment').addEventListener('click', (e) => {
+  const t = e.target.closest('button');
+  if (t && t.dataset.themeSet) setTheme(t.dataset.themeSet);
+});
+const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'light';
+
+/* EDIT MODE */
+let editMode = false;
+function setEditMode(on) {
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+  if (on) { grid.enableMove(true); grid.enableResize(true); }
+  else    { grid.enableMove(false); grid.enableResize(false); }
+  const editBtn = document.getElementById('editBtn');
+  if (editBtn) editBtn.classList.toggle('accent', on);
+  const lcEditBtn = document.getElementById('lcEditBtn');
+  const lcEditLabel = document.getElementById('lcEditLabel');
+  if (lcEditBtn) lcEditBtn.classList.toggle('active', on);
+  if (lcEditLabel) lcEditLabel.textContent = on ? 'EXIT EDIT MODE' : 'ENABLE EDIT MODE';
+  const sysMode = document.getElementById('sysMode');
+  if (sysMode) sysMode.textContent = on ? 'EDIT' : 'STANDARD';
+}
+document.getElementById('editBtn').addEventListener('click', () => setEditMode(!editMode));
+
+/* AWAY MODE */
+let awayActive = localStorage.getItem(STORAGE_KEY_AWAY) === '1';
+let awayMessage = localStorage.getItem(STORAGE_KEY_AWAY_MSG) || 'Back later.';
+
+function setAwayActive(on) {
+  awayActive = on;
+  localStorage.setItem(STORAGE_KEY_AWAY, on ? '1' : '0');
+  const banner = document.getElementById('awayBanner');
+  const overlay = document.getElementById('awayOverlay');
+  banner.classList.toggle('on', on);
+  overlay.classList.toggle('on', on);
+  document.getElementById('awayBannerMsg').textContent = awayMessage;
+  const panel = document.getElementById('awayPanel');
+  if (panel) {
+    panel.classList.toggle('active', on);
+    panel.querySelector('.label-off').style.display = on ? 'none' : '';
+    panel.querySelector('.label-on').style.display = on ? '' : 'none';
+    const toggleLabel = document.getElementById('awayToggleLabel');
+    if (toggleLabel) toggleLabel.textContent = on ? 'DEACTIVATE' : 'ACTIVATE';
+    const meta = document.getElementById('awayMeta');
+    if (meta) meta.textContent = on ? 'BROADCASTING' : 'STANDBY';
+  }
+}
+
+function setAwayMessage(msg) {
+  awayMessage = (msg || '').trim() || 'Back later.';
+  localStorage.setItem(STORAGE_KEY_AWAY_MSG, awayMessage);
+  const text = document.getElementById('awayMessageText');
+  if (text) text.textContent = awayMessage;
+  document.getElementById('awayBannerMsg').textContent = awayMessage;
+  const aoMsg = document.getElementById('aoMsg');
+  if (aoMsg) aoMsg.textContent = awayMessage;
+  ['awayInlineInput', 'aoInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && document.activeElement !== el) el.value = awayMessage;
+  });
+}
+
+/* CLOCK */
+function fmt2(n) { return n.toString().padStart(2, '0'); }
+const startTime = Date.now();
+
+function tick() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = now.getMinutes();
+  const s = now.getSeconds();
+  const isPM = h >= 12;
+  const h12 = ((h + 11) % 12) + 1;
+  const bcH = document.getElementById('bcH');
+  if (bcH) {
+    bcH.textContent = fmt2(h12);
+    document.getElementById('bcM').textContent = fmt2(m);
+    document.getElementById('bcS').textContent = fmt2(s);
+    document.getElementById('bcA').textContent = isPM ? 'PM' : 'AM';
+    document.getElementById('bcDate').textContent = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
+    document.getElementById('bcTz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop().replace('_', ' ').toUpperCase();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const doy = Math.floor((now - start) / 86400000);
+    document.getElementById('bcDoy').textContent = doy + ' / 365';
+  }
+  const topClock = document.getElementById('topClock');
+  if (topClock) topClock.textContent = fmt2(h12) + ':' + fmt2(m) + ' ' + (isPM ? 'PM' : 'AM');
+  const aoClock = document.getElementById('aoClock');
+  if (aoClock) aoClock.innerHTML = fmt2(h12) + '<span class="colon">:</span>' + fmt2(m);
+  const aoDate = document.getElementById('aoDate');
+  if (aoDate) aoDate.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+  const up = Math.floor((Date.now() - startTime) / 1000);
+  const uh = Math.floor(up / 3600);
+  const um = Math.floor((up % 3600) / 60);
+  const us = up % 60;
+  const upStr = fmt2(uh) + ':' + fmt2(um) + ':' + fmt2(us);
+  const footerStatus = document.getElementById('footerStatus');
+  if (footerStatus) footerStatus.textContent = 'UPTIME ' + upStr;
+  const sysUptime = document.getElementById('sysUptime');
+  if (sysUptime) sysUptime.textContent = upStr;
+}
+
+/* WEATHER (Open-Meteo) */
+const WMO = {
+  0:{label:'Clear',icon:'sun'},1:{label:'Mostly Clear',icon:'sun'},2:{label:'Partly Cloudy',icon:'cloud-sun'},3:{label:'Overcast',icon:'cloud'},
+  45:{label:'Fog',icon:'fog'},48:{label:'Rime Fog',icon:'fog'},
+  51:{label:'Light Drizzle',icon:'drizzle'},53:{label:'Drizzle',icon:'drizzle'},55:{label:'Heavy Drizzle',icon:'drizzle'},
+  61:{label:'Light Rain',icon:'rain'},63:{label:'Rain',icon:'rain'},65:{label:'Heavy Rain',icon:'rain'},
+  71:{label:'Light Snow',icon:'snow'},73:{label:'Snow',icon:'snow'},75:{label:'Heavy Snow',icon:'snow'},
+  80:{label:'Rain Showers',icon:'rain'},81:{label:'Heavy Showers',icon:'rain'},82:{label:'Violent Showers',icon:'rain'},
+  95:{label:'Thunderstorm',icon:'storm'},96:{label:'Storm + Hail',icon:'storm'},99:{label:'Heavy Storm',icon:'storm'}
+};
+
+const ICONS = {
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+  'cloud-sun':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M5.64 5.64l1.41 1.41M2 12h2M20 12h2M18.36 5.64l-1.41 1.41"/><circle cx="12" cy="10" r="3"/><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><path d="M8 20h12a2 2 0 0 0 0-4"/></svg>',
+  cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 1 0-1.41-8.78A7 7 0 1 0 4 16.5"/></svg>',
+  fog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14M3 10h18M5 15h14M7 20h10"/></svg>',
+  drizzle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 16a4.5 4.5 0 1 0-1.41-8.78A7 7 0 1 0 4 13.5"/><path d="M8 19v2M12 18v3M16 19v2"/></svg>',
+  rain:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 14a4.5 4.5 0 1 0-1.41-8.78A7 7 0 1 0 4 11.5"/><path d="M8 17l-2 4M12 17l-2 4M16 17l-2 4"/></svg>',
+  snow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 14a4.5 4.5 0 1 0-1.41-8.78A7 7 0 1 0 4 11.5"/><path d="M8 19v.01M12 21v.01M16 19v.01M8 22v.01M12 18v.01M16 22v.01"/></svg>',
+  storm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 14a4.5 4.5 0 1 0-1.41-8.78A7 7 0 1 0 4 11.5"/><polyline points="13 14 9 18 13 18 11 22"/></svg>'
+};
+
+async function fetchWeather() {
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude=36.15&longitude=-95.99&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,uv_index&hourly=temperature_2m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago&forecast_days=2';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('weather fetch failed');
+    const data = await r.json();
+    renderWeather(data);
+    renderHourly(data);
+  } catch (e) { console.warn('Weather error:', e); }
+}
+
+function renderWeather(data) {
+  const cur = data.current;
+  const code = cur.weather_code;
+  const desc = WMO[code] || { label: 'Unknown', icon: 'sun' };
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('wxTemp', Math.round(cur.temperature_2m));
+  set('wxCond', desc.label.toUpperCase());
+  set('wxFeels', Math.round(cur.apparent_temperature));
+  set('wxWind', Math.round(cur.wind_speed_10m) + ' MPH');
+  set('wxHum', cur.relative_humidity_2m + '%');
+  set('wxUv', Math.round(cur.uv_index || 0));
+  const wxIcon = document.getElementById('wxIcon');
+  if (wxIcon) wxIcon.innerHTML = ICONS[desc.icon] || ICONS.sun;
+  const updated = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  set('wxUpdated', 'UPDATED ' + updated);
+}
+
+function renderHourly(data) {
+  const track = document.getElementById('hourlyTrack');
+  if (!track) return;
+  track.innerHTML = '';
+  const times = data.hourly.time;
+  const temps = data.hourly.temperature_2m;
+  const codes = data.hourly.weather_code;
+  let nowIdx = times.findIndex(t => new Date(t) > new Date()) - 1;
+  const start = Math.max(0, nowIdx);
+  for (let i = start; i < start + 12 && i < times.length; i++) {
+    const t = new Date(times[i]);
+    const h = t.getHours();
+    const isPM = h >= 12;
+    const h12 = ((h + 11) % 12) + 1;
+    const desc = WMO[codes[i]] || { icon: 'sun' };
+    const isNow = i === start;
+    const div = document.createElement('div');
+    div.className = 'hr-tick' + (isNow ? ' now' : '');
+    div.innerHTML =
+      '<div class="hr-time">' + (isNow ? 'NOW' : h12 + (isPM ? 'P' : 'A')) + '</div>' +
+      '<div class="hr-icon">' + (ICONS[desc.icon] || ICONS.sun) + '</div>' +
+      '<div class="hr-temp">' + Math.round(temps[i]) + '&deg;</div>';
+    track.appendChild(div);
+  }
+  const updated = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const hxU = document.getElementById('hxUpdated');
+  if (hxU) hxU.textContent = 'UPDATED ' + updated;
+}
+
+function bindDynamicUI() {
+  const text = document.getElementById('awayMessageText');
+  if (text) text.textContent = awayMessage;
+  const inline = document.getElementById('awayInlineInput');
+  if (inline) {
+    inline.value = awayMessage;
+    inline.addEventListener('input', (e) => setAwayMessage(e.target.value));
+  }
+  const toggleBtn = document.getElementById('awayToggleBtn');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => setAwayActive(!awayActive));
+  const lcEditBtn = document.getElementById('lcEditBtn');
+  if (lcEditBtn) lcEditBtn.addEventListener('click', () => setEditMode(!editMode));
+  document.querySelectorAll('.lc-presets button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const preset = PRESETS[btn.dataset.preset];
+      if (preset) {
+        buildLayout(preset);
+        saveLayout();
+      }
+    });
+  });
+  const lcReset = document.getElementById('lcResetBtn');
+  if (lcReset) lcReset.addEventListener('click', () => {
+    if (confirm('Reset layout to default?')) {
+      buildLayout(DEFAULT_LAYOUT);
+      saveLayout();
+    }
+  });
+  setAwayActive(awayActive);
+  setEditMode(editMode);
+  setTheme(savedTheme);
+}
+
+const aoInput = document.getElementById('aoInput');
+aoInput.value = awayMessage;
+aoInput.addEventListener('input', (e) => setAwayMessage(e.target.value));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && awayActive) setAwayActive(false);
+});
+
+/* BOOT */
+buildLayout(loadLayout());
+setTheme(savedTheme);
+setAwayMessage(awayMessage);
+tick();
+setInterval(tick, 1000);
+fetchWeather();
+setInterval(fetchWeather, 5 * 60 * 1000);
+
+</script>
+</body>
+</html>
